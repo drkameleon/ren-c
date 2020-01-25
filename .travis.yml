@@ -1028,13 +1028,18 @@ script:
     #
     # Note: -z tests if a variable is undefined
     #
-    - NEW_NAME="r3-${GIT_COMMIT_SHORT}"
-    - if [[ $DEBUG != none ]]; then NEW_NAME+='-debug'; fi
+    - NEW_NAME="r3"; NEW_NAME_WITH_COMMIT="r3-${GIT_COMMIT_SHORT}"
+    - |
+      if [[ $DEBUG != none ]]; then
+          NEW_NAME+='-debug'
+          NEW_NAME_WITH_COMMIT+='-debug'
+      fi
     - |
       if [[ $STANDARD = c++ || $STANDARD = c++0x || $STANDARD = c++11 || $STANDARD = c++14 || $STANDARD = c++17 ]]; then
           NEW_NAME+='-cpp'
+          NEW_NAME_WITH_COMMIT+='-cpp'
       fi
-    - echo "$NEW_NAME"
+    - echo "$NEW_NAME_WITH_COMMIT"
 
     # Move the executable into a directory based on its OS_ID platform.
     # This is because the deploy step is run for each OS and would
@@ -1046,38 +1051,34 @@ script:
     - |
       # Windows builds end in .exe
       if [[ -e r3.exe ]]; then
-           cp r3.exe "${OS_ID}/${NEW_NAME}.exe"
-           if [[ $DEBUG != none ]]; then 
-              mv r3.exe "${OS_ID}/r3{-debug}.exe"
-           else
-              mv r3.exe "${OS_ID}/r3.exe"
-           fi
+          cp r3.exe "${OS_ID}/${NEW_NAME_WITH_COMMIT}.exe"
+          mv r3.exe "${OS_ID}/r3{NEW_NAME}.exe"
       fi
 
       # Most other platforms have no suffix
       if [[ -e r3 ]]; then
-           cp r3 "${OS_ID}/${NEW_NAME}"
-           mv r3 "${OS_ID}/r3"
+          cp r3 "${OS_ID}/${NEW_NAME_WITH_COMMIT}"
+          mv r3 "${OS_ID}/r3{NEW_NAME}"
       fi
 
       # All emscripten builds produce .js and .wasm
       if [[ -e libr3.js ]]; then
-           cp libr3.js "${OS_ID}/lib${NEW_NAME}.js"
-           mv libr3.js "${OS_ID}/libr3.js"
+           cp libr3.js "${OS_ID}/lib${NEW_NAME_WITH_COMMIT}.js"
+           mv libr3.js "${OS_ID}/lib${NEW_NAME}.js"
       fi
       if [[ -e libr3.wasm ]]; then
-           cp libr3.wasm "${OS_ID}/lib${NEW_NAME}.wasm"
-           mv libr3.wasm "${OS_ID}/libr3.wasm"
+           cp libr3.wasm "${OS_ID}/lib${NEW_NAME_WITH_COMMIT}.wasm"
+           mv libr3.wasm "${OS_ID}/lib${NEW_NAME}.wasm"
       fi
 
       # Only pthreads builds produce .js.mem and .worker.js
       if [[ -e libr3.js.mem ]]; then
-           cp libr3.js.mem "${OS_ID}/lib${NEW_NAME}.js.mem"
-           mv libr3.js.mem "${OS_ID}/libr3.js.mem"
+           cp libr3.js.mem "${OS_ID}/lib${NEW_NAME_WITH_COMMIT}.js.mem"
+           mv libr3.js.mem "${OS_ID}/lib${NEW_NAME}.js.mem"
       fi
       if [[ -e libr3.worker.js ]]; then
-           cp libr3.worker.js "${OS_ID}/lib${NEW_NAME}.worker.js"
-           mv libr3.worker.js "${OS_ID}/libr3.worker.js"
+           cp libr3.worker.js "${OS_ID}/lib${NEW_NAME_WITH_COMMIT}.worker.js"
+           mv libr3.worker.js "${OS_ID}/lib${NEW_NAME}.worker.js"
       fi
 
     # Ultimately we'd like extensions to have an easy standard way to encap
@@ -1103,7 +1104,7 @@ script:
         wget http://hostilefork.com/media/shared/prebuilt/r3-encap
         chmod +x ./r3-encap
         ./r3-encap "${TOP_DIR}/extensions/tcc/encap-tcc-resources.reb" OS_ID="${OS_ID}"
-        mv tcc-encap.zip "${OS_ID}/${NEW_NAME}-tcc-encap.zip"
+        mv tcc-encap.zip "${OS_ID}/${NEW_NAME_WITH_COMMIT}-tcc-encap.zip"
       fi
 
     # Web Browsers are picky about the MIME type of WebAssembly files.  If
